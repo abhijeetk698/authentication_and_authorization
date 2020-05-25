@@ -3,6 +3,7 @@ const   express                     = require("express"),
         User                        = require("./models/user.js");
         passport                    = require("passport"),
         bodyParser                  = require("body-parser"),
+        localStrategy               = require("passport-local"),
         passportLocalMongoose       = require("passport-local-mongoose");
         expressSession              = require("express-session");
 
@@ -26,6 +27,7 @@ app.use(passport.session());
 
 // passport serializing and deserializing
 
+passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
@@ -42,6 +44,9 @@ app.get("/secret",(req,res)=>{
 
 // AUTH ROUTES ----------------------------------------------
 
+
+// Register Route .....................................
+
 app.get("/register",(req,res)=>{
     res.render("register");
 })
@@ -57,7 +62,18 @@ app.post("/register",(req,res)=>{
             res.redirect("secret");
         })
     })
-})
+});
+
+// login route .......................................................................
+
+app.get("/login",(req,res)=>{
+    res.render("login");
+});
+
+app.post("/login",passport.authenticate("local",{
+    successRedirect : "/secret",
+    failureRedirect : "/login"
+}),(req,res)=>{})
 
 
 app.listen(3000,()=>{
