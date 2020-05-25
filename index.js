@@ -13,7 +13,7 @@ mongoose.connect("mongodb://localhost/auth_auth_app",{ useNewUrlParser: true ,us
 
 const app=express();
 app.set("view engine","ejs");
-
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(expressSession({
     secret : "this is an authentication app",
     resave : false,
@@ -29,7 +29,7 @@ app.use(passport.session());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-passport.seria
+// ROUTES =========================================>>>>>>>>
 
 
 app.get("/",(req,res)=>{
@@ -39,6 +39,26 @@ app.get("/",(req,res)=>{
 app.get("/secret",(req,res)=>{
     res.render("secret");
 });
+
+// AUTH ROUTES ----------------------------------------------
+
+app.get("/register",(req,res)=>{
+    res.render("register");
+})
+
+app.post("/register",(req,res)=>{
+    User.register(new User({username:req.body.username}),req.body.password,(err,user)=>{
+        if(err){
+            console.log(err);
+            return res.redirect("register");
+        }
+        passport.authenticate("local")(req,res,()=>{
+            console.log(user);
+            res.redirect("secret");
+        })
+    })
+})
+
 
 app.listen(3000,()=>{
     console.log("Server has started ....")
